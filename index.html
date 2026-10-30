@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>测测你的灵魂与哪位作家相似？</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<style>
+  /* ===== 设计变量：莫兰迪浅色系 ===== */
+  :root{
+    --bg:#F6F3EC;            /* 奶油底色 */
+    --card:#FFFFFF;
+    --ink:#3E3C36;           /* 主文字（暖黑） */
+    --ink-soft:#7C796E;      /* 次级文字 */
+    --ink-faint:#A9A69A;     /* 弱文字 */
+    --line:#EAE5DA;          /* 分隔线 */
+    --accent:#8FA48D;        /* 鼠尾草绿（主强调） */
+    --accent-deep:#70846F;
+    --accent-soft:#E9EFE3;
+    --rose:#C9AFA6;          /* 雾霾粉（点缀） */
+    --rose-soft:#F3EAE4;
+    --blue:#B9C9CE;          /* 浅灰蓝（点缀） */
+    --blue-soft:#E7EDEE;
+    --sand:#E3D9C2;          /* 沙色（点缀） */
+    --sand-soft:#F2EDDE;
+    --radius:18px;
+    --shadow:0 10px 30px rgba(120,110,90,.10);
+    --serif:'Noto Serif SC', Georgia, 'Songti SC', 'SimSun', serif;
+    --sans:'Noto Sans SC', -apple-system, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:var(--sans);
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 50% -200px, #ECE7DB 0%, rgba(236,231,219,0) 60%),
+      var(--bg);
+    min-height:100vh;
+    line-height:1.7;
+  }
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  img{display:block;max-width:100%;}
+
+  /* ===== 顶部标题栏 ===== */
+  .topbar{
+    position:sticky;top:0;z-index:20;
+    height:48px;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(246,243,236,.88);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    border-bottom:1px solid rgba(234,229,218,.7);
+  }
+  .topbar .mini-title{
+    font-family:var(--serif);font-size:14px;font-weight:600;
+    letter-spacing:.5px;color:var(--ink);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    max-width:86vw;
+  }
+  .topbar.hidden{display:none;}
+
+  /* ===== 页面容器 ===== */
+  .wrap{
+    max-width:520px;margin:0 auto;
+    padding:0 20px 48px;
+  }
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* ===== 通用卡片与按钮 ===== */
+  .card{
+    background:var(--card);border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    border:1px solid rgba(234,229,218,.6);
+  }
+  .btn-primary{
+    width:100%;height:52px;border-radius:999px;
+    background:var(--accent);color:#fff;
+    font-size:16px;font-weight:700;letter-spacing:1px;
+    box-shadow:0 6px 18px rgba(143,164,141,.35);
+    transition:background .2s, transform .1s, opacity .2s;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .btn-primary:active{transform:scale(.985);}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed;box-shadow:none;}
+  .btn-ghost{
+    width:100%;height:52px;border-radius:999px;
+    background:transparent;color:var(--ink-soft);
+    font-size:15px;font-weight:500;
+    border:1px solid var(--line);
+    transition:background .2s;
+  }
+  .btn-ghost:active{background:rgba(234,229,218,.4);}
+
+  /* ===== 封面 ===== */
+  .cover-hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:40px;}
+  .cover-hero .hero-img{
+    width:min(280px,72vw);border-radius:22px;
+    box-shadow:0 14px 34px rgba(120,110,90,.16);
+  }
+  .cover-hero h1{
+    font-family:var(--serif);font-size:27px;font-weight:700;
+    line-height:1.45;margin-top:30px;letter-spacing:.5px;
+  }
+  .cover-hero .intro{
+    margin-top:16px;color:var(--ink-soft);font-size:15px;
+    max-width:320px;text-wrap:pretty;
+  }
+  .cover-hero .intro b{color:var(--accent-deep);font-weight:700;}
+  .cover-cta{margin-top:34px;width:100%;max-width:340px;}
+  .cover-meta{
+    margin-top:18px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;
+  }
+  .cover-meta .chip{
+    font-size:12px;color:var(--ink-soft);
+    background:rgba(255,255,255,.7);border:1px solid var(--line);
+    border-radius:999px;padding:5px 12px;
+  }
+
+  /* ===== 答题页 ===== */
+  .quiz-progress{margin-top:20px;}
+  .quiz-progress .row{
+    display:flex;justify-content:space-between;align-items:baseline;
+    font-size:13px;color:var(--ink-soft);
+  }
+  .quiz-progress .row .q-no{font-family:var(--serif);font-weight:600;color:var(--ink);}
+  .progress-track{
+    margin-top:8px;height:6px;border-radius:999px;
+    background:rgba(234,229,218,.9);overflow:hidden;
+  }
+  .progress-bar{
+    height:100%;border-radius:999px;
+    background:linear-gradient(90deg,var(--accent),var(--rose));
+    transition:width .35s ease;
+  }
+  .question-card{margin-top:18px;padding:26px 22px 22px;}
+  .question-text{
+    font-family:var(--serif);font-size:18.5px;font-weight:600;
+    line-height:1.6;text-wrap:pretty;
+  }
+  .options{display:flex;flex-direction:column;gap:12px;margin-top:22px;}
+  .opt{
+    display:flex;align-items:center;gap:14px;text-align:left;
+    width:100%;padding:14px 16px;border-radius:16px;
+    border:1.5px solid var(--line);background:var(--card);
+    font-size:15px;color:var(--ink);line-height:1.55;
+    transition:border-color .18s, background .18s, transform .1s;
+  }
+  .opt:active{transform:scale(.99);}
+  .opt .letter{
+    flex:none;width:28px;height:28px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:700;color:var(--ink-soft);
+    background:var(--sand-soft);transition:all .18s;
+  }
+  .opt:hover{border-color:var(--blue);}
+  .opt.selected{
+    border-color:var(--accent);background:var(--accent-soft);
+  }
+  .opt.selected .letter{background:var(--accent);color:#fff;}
+  .opt.selected::after{
+    content:"";flex:none;width:18px;height:18px;margin-left:auto;
+    border-radius:50%;
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 3px, transparent 3.5px),
+      var(--accent);
+  }
+  .quiz-nav{
+    display:flex;align-items:center;gap:14px;margin-top:26px;
+  }
+  .quiz-nav .prev{
+    flex:none;width:auto;padding:0 8px;height:52px;
+    font-size:14.5px;color:var(--ink-soft);
+  }
+  .quiz-nav .prev:disabled{visibility:hidden;}
+  .quiz-nav .next{flex:1;}
+  .quiz-tip{margin-top:16px;text-align:center;font-size:12px;color:var(--ink-faint);}
+
+  /* ===== 结果页 ===== */
+  .result-head{text-align:center;padding-top:30px;}
+  .result-head .eyebrow{
+    font-size:13px;letter-spacing:3px;color:var(--ink-soft);
+  }
+  .result-card{margin-top:18px;padding:30px 24px 26px;text-align:center;}
+  .result-card .w-name{
+    font-family:var(--serif);font-size:34px;font-weight:700;line-height:1.3;
+  }
+  .result-card .w-meta{
+    margin-top:8px;font-size:13px;color:var(--ink-soft);
+  }
+  .match{margin-top:22px;}
+  .match .match-num{
+    font-family:var(--serif);font-size:40px;font-weight:700;
+    color:var(--accent-deep);
+  }
+  .match .match-label{font-size:13px;color:var(--ink-soft);margin-top:2px;}
+  .match-track{
+    margin:12px auto 0;width:220px;max-width:80%;height:7px;
+    border-radius:999px;background:rgba(234,229,218,.9);overflow:hidden;
+  }
+  .match-bar{
+    height:100%;border-radius:999px;
+    background:linear-gradient(90deg,var(--accent),var(--rose));
+    transition:width .8s ease;
+  }
+  .tag-row{
+    margin-top:20px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;
+  }
+  .tag{
+    font-size:12.5px;padding:6px 13px;border-radius:999px;
+    background:var(--rose-soft);color:#8A6A60;
+    border:1px solid rgba(201,175,166,.4);
+  }
+  .tag.sage{background:var(--accent-soft);color:var(--accent-deep);border-color:rgba(143,164,141,.4);}
+  .tag.blue{background:var(--blue-soft);color:#5E7B84;border-color:rgba(185,201,206,.5);}
+  .w-body{margin-top:26px;text-align:left;}
+  .w-block{padding:16px 0;border-top:1px dashed var(--line);}
+  .w-block:first-child{border-top:none;padding-top:0;}
+  .w-block h4{
+    font-size:13px;letter-spacing:2px;color:var(--accent-deep);
+    margin-bottom:7px;font-weight:700;
+  }
+  .w-block p{font-size:14.5px;color:var(--ink);text-wrap:pretty;}
+  .quote-box{
+    margin-top:24px;padding:20px 20px;border-radius:16px;
+    background:var(--rose-soft);border:1px solid rgba(201,175,166,.35);
+    text-align:center;
+  }
+  .quote-box .q-label{font-size:12px;letter-spacing:2px;color:#9A7A70;}
+  .quote-box .q-text{
+    font-family:var(--serif);font-size:16px;font-weight:600;
+    color:#6E554D;margin-top:8px;line-height:1.7;
+  }
+  .dims{margin-top:24px;text-align:left;}
+  .dims h4{font-size:13px;letter-spacing:2px;color:var(--ink-soft);margin-bottom:12px;font-weight:700;}
+  .dim-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+  .dim-row .dim-name{flex:none;width:64px;font-size:13px;color:var(--ink);}
+  .dim-row .dim-track{flex:1;height:6px;border-radius:999px;background:rgba(234,229,218,.9);overflow:hidden;}
+  .dim-row .dim-bar{height:100%;border-radius:999px;background:var(--blue);transition:width .6s ease;}
+  .dim-row .dim-val{flex:none;width:30px;text-align:right;font-size:12px;color:var(--ink-soft);}
+  .result-brand{
+    margin-top:26px;text-align:center;
+    font-family:var(--serif);font-size:13.5px;color:var(--ink-soft);
+    letter-spacing:.5px;
+  }
+  .result-actions{margin-top:22px;display:flex;flex-direction:column;gap:12px;}
+  .result-note{
+    margin-top:18px;text-align:center;font-size:12px;color:var(--ink-faint);
+  }
+
+  /* 动效克制：仅轻量渐入 */
+  .view.active{animation:fadeUp .3s ease both;}
+  @keyframes fadeUp{
+    from{opacity:0;transform:translateY(8px);}
+    to{opacity:1;transform:none;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important;}
+  }
+  @media (max-width:380px){
+    .cover-hero h1{font-size:24px;}
+    .question-text{font-size:17.5px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar hidden" id="topbar">
+  <div class="mini-title">测测你的灵魂与哪位作家相似？</div>
+</header>
+
+<main class="wrap">
+
+  <!-- ===== 视图：封面 ===== -->
+  <section class="view active" id="view-cover">
+    <div class="cover-hero">
+      <img class="hero-img" src="https://aka.doubaocdn.com/s/UpFLx7yJdX" alt="摊开的书与羽毛笔插画">
+      <h1>测测你的灵魂<br>与哪位作家相似？</h1>
+      <p class="intro">
+        20 道关于生活、审美与选择的小问题，没有标准答案，<b>选最像你的那个就好</b>。
+        测完看看，你的灵魂深处，藏着哪位作家的影子。
+      </p>
+      <div class="cover-cta">
+        <button class="btn-primary" id="btn-start">开始测试</button>
+      </div>
+      <div class="cover-meta">
+        <span class="chip">20 道题</span>
+        <span class="chip">约 3 分钟</span>
+        <span class="chip">30 位作家候场</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 视图：答题 ===== -->
+  <section class="view" id="view-quiz">
+    <div class="quiz-progress">
+      <div class="row">
+        <span class="q-no" id="q-no">第 1 / 20 题</span>
+        <span id="q-pct">0%</span>
+      </div>
+      <div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div>
+    </div>
+    <div class="card question-card">
+      <p class="question-text" id="q-text"></p>
+      <div class="options" id="q-opts"></div>
+    </div>
+    <div class="quiz-nav">
+      <button class="prev" id="btn-prev">上一题</button>
+      <button class="btn-primary next" id="btn-next" disabled>下一题</button>
+    </div>
+    <p class="quiz-tip">选完当前这题，才能进入下一题哦</p>
+  </section>
+
+  <!-- ===== 视图：结果 ===== -->
+  <section class="view" id="view-result">
+    <div class="result-head">
+      <div class="eyebrow">你的文学灵魂是</div>
+    </div>
+    <div class="card result-card" id="result-card"></div>
+    <div class="result-actions">
+      <button class="btn-primary" id="btn-retry">重新测试</button>
+      <button class="btn-ghost" id="btn-home">返回封面</button>
+    </div>
+    <p class="result-note">结果仅供娱乐，别太当真，你比任何标签都丰富。</p>
+  </section>
+
+</main>
+
+<script>
+/* ===== 数据 ===== */
+
+// 八种灵魂气质
+const DIMS = {
+  A:'理想主义', B:'锐利深刻', C:'温柔治愈', D:'浪漫诗意',
+  E:'理性思辨', F:'自由不羁', G:'敏感内省', H:'超然通透'
+};
+
+// 20 道题，每题 4 个选项；p=主气质(+2)，s=辅气质(+1)
+const QUESTIONS = [
+  { q:'如果有一整天空闲，你会怎么过？', opts:[
+    {t:'重看一部经典电影，为某个理想主义的瞬间热泪盈眶', p:'A', s:'D'},
+    {t:'做一顿好饭，把房间收拾得干干净净', p:'C', s:'A'},
+    {t:'研究一个感兴趣的话题，认真做点笔记', p:'E', s:'B'},
+    {t:'一个人发呆，回想最近的人和事', p:'G', s:'C'}
+  ]},
+  { q:'朋友跟你吐槽一件糟心事，你的第一反应是？', opts:[
+    {t:'一针见血点出问题根源，朋友直呼「太狠了但好准」', p:'B', s:'E'},
+    {t:'陪TA聊到深夜，把情绪写成小诗发给TA', p:'D', s:'C'},
+    {t:'直接拉TA出去吃顿好的，明天再说', p:'F', s:'B'},
+    {t:'认真听完，说一句「都会过去的，别太较真」', p:'H', s:'E'}
+  ]},
+  { q:'你更欣赏哪种类型的人？', opts:[
+    {t:'温暖善良、总替别人着想的人', p:'C', s:'A'},
+    {t:'逻辑清晰、不情绪化的人', p:'E', s:'B'},
+    {t:'情感细腻、懂得欣赏生活的人', p:'G', s:'D'},
+    {t:'有信念、坚持做自己认为对的事的人', p:'A', s:'C'}
+  ]},
+  { q:'面对一段结束的关系，你通常会？', opts:[
+    {t:'写很多文字，把情绪都释放出来', p:'D', s:'F'},
+    {t:'立刻去学新东西、去旅行，重新出发', p:'F', s:'D'},
+    {t:'难过，但很快想通：缘分如此', p:'H', s:'E'},
+    {t:'冷静复盘，看清问题出在哪里', p:'B', s:'G'}
+  ]},
+  { q:'旅行时你更喜欢？', opts:[
+    {t:'做好攻略，行程安排得明明白白', p:'E', s:'C'},
+    {t:'去安静的地方，慢慢感受氛围', p:'G', s:'D'},
+    {t:'去有历史意义的地方，看理想与现实的痕迹', p:'A', s:'E'},
+    {t:'吃当地美食，和当地人聊聊天', p:'C', s:'D'}
+  ]},
+  { q:'你觉得自己最像下面哪种动物？', opts:[
+    {t:'猫：自由、优雅，只按自己的节奏', p:'F', s:'A'},
+    {t:'鹤：安静、超然，不与凡鸟争', p:'H', s:'F'},
+    {t:'鹰：目光犀利，看透一切', p:'B', s:'E'},
+    {t:'夜莺：为美歌唱，哪怕无人听见', p:'D', s:'A'}
+  ]},
+  { q:'你理想中的生活是？', opts:[
+    {t:'内心丰盈，一个人也能把日子过出滋味', p:'G', s:'H'},
+    {t:'做有意义的事，让世界好一点点', p:'A', s:'D'},
+    {t:'有爱的人和温暖的家，三餐四季', p:'C', s:'A'},
+    {t:'按计划一步步实现目标，掌控人生', p:'E', s:'B'}
+  ]},
+  { q:'读到一本很喜欢的书，你会？', opts:[
+    {t:'合上书，安静地回味很久，不急于分享', p:'H', s:'G'},
+    {t:'快速抓住作者的核心观点，点评一针见血', p:'B', s:'E'},
+    {t:'摘抄喜欢的句子，配图发朋友圈', p:'D', s:'A'},
+    {t:'想立刻找到同好，聊到停不下来', p:'F', s:'D'}
+  ]},
+  { q:'你面对「规则」的态度是？', opts:[
+    {t:'遵守规则，但坚持内心认为对的事', p:'A', s:'F'},
+    {t:'温和地遵守，也照顾别人的感受', p:'C', s:'E'},
+    {t:'先理解规则背后的逻辑，再决定怎么对待', p:'E', s:'B'},
+    {t:'会感到束缚，需要很多独处时间消化', p:'G', s:'F'}
+  ]},
+  { q:'你更容易被什么打动？', opts:[
+    {t:'一个人不动声色的清醒和坚持', p:'B', s:'C'},
+    {t:'夕阳、海浪、陌生人一句温柔的问候', p:'D', s:'A'},
+    {t:'荒唐但勇敢的冒险', p:'F', s:'A'},
+    {t:'时间带来的释然与和解', p:'H', s:'G'}
+  ]},
+  { q:'如果有机会写一本书，你会写？', opts:[
+    {t:'一个治愈人心、温暖落地的故事', p:'C', s:'D'},
+    {t:'一部冷静剖析人性的作品', p:'E', s:'B'},
+    {t:'自己半真半假的成长记录', p:'G', s:'D'},
+    {t:'关于理想和信念的内心独白', p:'A', s:'H'}
+  ]},
+  { q:'你在群体中通常是？', opts:[
+    {t:'氛围担当：有我在就不会冷场', p:'D', s:'C'},
+    {t:'自由派：说来就来说走就走', p:'F', s:'G'},
+    {t:'旁观者：微笑看大家闹', p:'H', s:'F'},
+    {t:'吐槽担当：一句话说到点子上', p:'B', s:'E'}
+  ]},
+  { q:'你对「爱情」的理解更接近？', opts:[
+    {t:'是理解与并肩，是清醒的选择', p:'E', s:'B'},
+    {t:'是深刻的心动，也是长久的自省', p:'G', s:'D'},
+    {t:'是救赎，让人成为更好的人', p:'A', s:'D'},
+    {t:'是陪伴，是一起吃饭一起变老', p:'C', s:'A'}
+  ]},
+  { q:'面对困境，你最先做的是？', opts:[
+    {t:'先逃离现场，喘口气再说', p:'F', s:'E'},
+    {t:'想开点，天塌下来当被盖', p:'H', s:'F'},
+    {t:'直面问题，找到最锋利的那把刀', p:'B', s:'E'},
+    {t:'把情绪表达出来，哭一场、写一段', p:'D', s:'A'}
+  ]},
+  { q:'你理想中的「美」更接近？', opts:[
+    {t:'孤独的、有故事感的、有点破碎的', p:'G', s:'B'},
+    {t:'干净纯粹的、闪着理想光的', p:'A', s:'D'},
+    {t:'质朴日常的、有烟火气的', p:'C', s:'D'},
+    {t:'克制的、有结构的、耐看的', p:'E', s:'B'}
+  ]},
+  { q:'你更愿意被评价为？', opts:[
+    {t:'通透', p:'H', s:'C'},
+    {t:'清醒', p:'B', s:'G'},
+    {t:'浪漫', p:'D', s:'C'},
+    {t:'有趣', p:'F', s:'C'}
+  ]},
+  { q:'深夜睡不着时，你脑子里常想的是？', opts:[
+    {t:'一些宏大的问题：人生、意义、远方', p:'A', s:'H'},
+    {t:'白天没来得及照顾好的情绪和关系', p:'C', s:'A'},
+    {t:'明天的计划，事无巨细地过一遍', p:'E', s:'H'},
+    {t:'白天说过的一句话、一个眼神', p:'G', s:'C'}
+  ]},
+  { q:'你更喜欢哪种环境？', opts:[
+    {t:'城市的夜晚，霓虹下的人间清醒', p:'B', s:'E'},
+    {t:'海边的黄昏，美到说不出话', p:'D', s:'C'},
+    {t:'旷野、山路，辽阔自由', p:'F', s:'H'},
+    {t:'窗边一角，一盏灯一本书', p:'H', s:'G'}
+  ]},
+  { q:'别人眼中，你最常被低估的是？', opts:[
+    {t:'你的温柔和包容', p:'C', s:'H'},
+    {t:'你的冷静和判断力', p:'E', s:'B'},
+    {t:'你的敏感和细腻', p:'G', s:'D'},
+    {t:'你的坚定和信念', p:'A', s:'F'}
+  ]},
+  { q:'如果灵魂有形状，你觉得它像？', opts:[
+    {t:'一团不肯熄灭的火', p:'D', s:'A'},
+    {t:'一阵穿堂而过的风', p:'F', s:'G'},
+    {t:'一片安静澄澈的湖', p:'H', s:'C'},
+    {t:'一把出鞘的、清醒的刀', p:'B', s:'E'}
+  ]}
+];
+
+// 30 位作家：pair = [主气质, 辅气质]，全局唯一
+const WRITERS = [
+  // —— 国内 10 位 ——
+  { name:'鲁迅', origin:'国内', era:'中国 · 近现代', pair:['B','E'], tags:['清醒','锋利','赤子心'],
+    spirit:'你有一双看透世情的眼睛，不愿粉饰太平，总想撕开表面，让人看见真相。你的锋利背后，是对这个世界很深很深的在乎。',
+    base:'外冷内热，嘴上毒舌，心里装着人间。朋友不多，但每一个都真正懂你。',
+    flaw:'有时候太较真，把玩笑也当成了战斗；累了也不肯承认，习惯一个人硬扛。',
+    line:'你醒着的样子，其实很温柔。' },
+  { name:'张爱玲', origin:'国内', era:'中国 · 近现代', pair:['B','G'], tags:['通透','孤傲','人间清醒'],
+    spirit:'你对人和关系的理解总是又快又准，像站在高处俯瞰。你从不幻想，却比谁都懂得什么是真正的浪漫。',
+    base:'清冷疏离，习惯保持距离；在喜欢的事物面前，又固执得像个小孩子。',
+    flaw:'太清醒的人容易孤独。你明明渴望被懂得，却常常先把人推开。',
+    line:'你看透了很多事，但请别忘了，你也值得被好好爱着。' },
+  { name:'沈从文', origin:'国内', era:'中国 · 近现代', pair:['C','D'], tags:['温润','含蓄','山水情深'],
+    spirit:'你的世界有一种安静的底色，像湘西的河水。你相信人性里那些朴素、干净、长久的东西，并愿意为它们停留。',
+    base:'温和而有韧劲，不争不抢，却有自己的坚持；对美和真，你有一种近乎固执的忠诚。',
+    flaw:'太含蓄了，心里的话总藏在行动里，爱你也需要一点耐心去猜。',
+    line:'你守护的简单，是这世上最珍贵的东西。' },
+  { name:'林语堂', origin:'国内', era:'中国 · 近现代', pair:['H','A'], tags:['旷达','幽默','生活家'],
+    spirit:'你活得通透，懂得生活是用来享受、而不是用来较劲的。再难的事到了你这里，都能变成一句「那也没什么」。',
+    base:'随和幽默，自带松弛感；不执念、不内耗，是朋友里最好相处的那一个。',
+    flaw:'太看得开，有时会让在乎你的人觉得你不够上心。',
+    line:'你把日子过成了诗，还非说自己只是会吃会玩。' },
+  { name:'三毛', origin:'国内', era:'中国 · 现当代', pair:['F','D'], tags:['自由','热烈','灵魂在路上'],
+    spirit:'你的心里住着一阵风，总想去远方。你相信生活可以过得浓烈而浪漫，也真的愿意为热爱说走就走。',
+    base:'洒脱又敏感，看起来什么都不在乎，其实每段相遇都认真放在心里。',
+    flaw:'太随性，容易被情绪和冲动牵着走，摔过跤也还是不改。',
+    line:'你这一生，会去过很多地方，也会被很多人记得。' },
+  { name:'汪曾祺', origin:'国内', era:'中国 · 现当代', pair:['C','H'], tags:['烟火','平和','人间值得'],
+    spirit:'你有一双发现美的眼睛：菜市场的热闹、一碗面的热气，都能让你觉得人间值得。你不谈宏大，却把日子过得有滋有味。',
+    base:'淡泊从容，不焦虑不攀比；对生活有朴素的热情，是那种被生活善待过、也愿意善待生活的人。',
+    flaw:'太佛系，重要的事也常常「算了算了」，让人又爱又急。',
+    line:'你让身边的人觉得，活着真好。' },
+  { name:'王小波', origin:'国内', era:'中国 · 现当代', pair:['F','E'], tags:['有趣','独立','特立独行'],
+    spirit:'你拒绝被定义，讨厌一切想把你塞进框框里的东西。你相信有趣比正确更重要，也敢为自己的想法买单。',
+    base:'聪明而不世故，幽默里带着点傲气；内心柔软，只是不轻易给人看。',
+    flaw:'有点倔，认准的事九头牛也拉不回；懒起来，也真的懒。',
+    line:'愿你永远不用学会，那些你不想学会的事。' },
+  { name:'萧红', origin:'国内', era:'中国 · 近现代', pair:['G','F'], tags:['敏感','倔强','一生漂泊'],
+    spirit:'你的感受力比别人细腻得多，风、云、一句无心的话，都能在你心里住很久。你渴望安稳，却总是被命运推着走。',
+    base:'倔强而脆弱，越难过越不肯低头；你的心事，都是留给懂的人看的。',
+    flaw:'太容易被情绪影响，也容易把自己逼到墙角。',
+    line:'你走得跌跌撞撞，但每一步都是自己选的。' },
+  { name:'余华', origin:'国内', era:'中国 · 当代', pair:['E','B'], tags:['冷静','幽默','黑色幽默'],
+    spirit:'你看过生活的残酷，却不打算哭天喊地。你习惯用冷静的语调讲悲伤的事，用幽默消解沉重——这是你的温柔方式。',
+    base:'沉稳内敛，自带一种「看开了」的松弛；话不多，但每句都实在。',
+    flaw:'太擅长不动声色，情绪都自己咽了，身边的人常常后知后觉。',
+    line:'笑着活下去，是你对生活最大的敬意。' },
+  { name:'席慕蓉', origin:'国内', era:'中国 · 现当代', pair:['D','C'], tags:['温柔','诗意','一生浪漫'],
+    spirit:'你对美和爱有着天生的敏感，一片叶子、一首老歌，都能让你心头一动。你相信温柔是力量，也愿意把日子过成诗。',
+    base:'细腻深情，念旧而长情；你爱得安静，却比谁都长久。',
+    flaw:'太容易心软，也容易在回忆里待太久。',
+    line:'你把平凡的日子，过成了别人的风景。' },
+
+  // —— 国外 20 位 ——
+  { name:'村上春树', origin:'国外', era:'日本 · 现当代', pair:['G','H'], tags:['疏离','孤独','都市漫游'],
+    spirit:'你享受独处，喜欢在城市的缝隙里漫游：一家小咖啡馆、一张旧唱片，都是你的世界。你孤独，但并不寂寞。',
+    base:'安静自律，有自己的小宇宙；看起来温和有礼，心里有一道别人进不去的门。',
+    flaw:'太习惯一个人，偶尔也想被需要，却不知道怎么开口。',
+    line:'你的孤独，是一座安静又丰盛的花园。' },
+  { name:'加缪', origin:'国外', era:'法国 · 二十世纪', pair:['E','H'], tags:['荒诞','清醒','反抗'],
+    spirit:'你深知世界并不完美，甚至有点荒谬，但你依然选择认真生活、温柔待人。你的清醒里，有一种不认输的倔强。',
+    base:'理性克制，情绪稳定得让人安心；你不信神，却信自己心里那盏灯。',
+    flaw:'太独立，难过的时候也习惯自己扛，别人很难走近。',
+    line:'看清了生活的真相，你依然热爱它。' },
+  { name:'毛姆', origin:'国外', era:'英国 · 二十世纪', pair:['H','E'], tags:['通透','毒舌','人间观察'],
+    spirit:'你像一个人间观察者，看谁都带着三分好奇、两分理解、一分调侃。你早早就看懂了人性的复杂，却不打算说破。',
+    base:'聪明世故，又保留着赤诚；喜欢独处，讨厌无聊的社交。',
+    flaw:'有点刻薄，嘴上不饶人，心里其实比谁都软。',
+    line:'你看透了人心，却还是愿意相信善。' },
+  { name:'博尔赫斯', origin:'国外', era:'阿根廷 · 二十世纪', pair:['E','D'], tags:['哲思','书卷','迷宫'],
+    spirit:'你的精神世界像一座图书馆，藏着无数条通往远方的路。你喜欢思考那些大问题：时间、命运、无限、自己是谁。',
+    base:'安静而深邃，在人群里话不多，在思想里滔滔不绝。',
+    flaw:'想得太多，容易活在自己的世界里，错过眼前的人间。',
+    line:'你心里的迷宫，藏着这个世界最美的答案。' },
+  { name:'太宰治', origin:'国外', era:'日本 · 二十世纪', pair:['G','D'], tags:['敏感','脆弱','极致浪漫'],
+    spirit:'你的情感浓度很高，笑是真的笑，痛也是真的痛。你看似讨好世界，其实只是太渴望被爱、被理解。',
+    base:'温柔到近乎软弱，善良到让人心疼；你总在别人的期待和自己的真实之间拉扯。',
+    flaw:'太容易否定自己，明明已经很好了，还是觉得自己不够。',
+    line:'你那么努力地活着，已经非常了不起了。' },
+  { name:'王尔德', origin:'国外', era:'英国 · 十九世纪', pair:['D','B'], tags:['唯美','张扬','金句大师'],
+    spirit:'你相信美就是一切，愿意为美和热爱倾尽所有。你活得张扬而坦荡，讨厌平庸，拒绝将就。',
+    base:'自信傲娇，嘴上伶俐，心里有柔软的天真；你爱漂亮，也爱得漂亮。',
+    flaw:'有点虚荣、有点任性，被夸奖就开心，被忽视就闹别扭。',
+    line:'你值得世间一切美好，别委屈自己。' },
+  { name:'简·奥斯汀', origin:'国外', era:'英国 · 十九世纪', pair:['E','C'], tags:['清醒','机智','人间温情'],
+    spirit:'你看得懂人心的弯弯绕绕，却依然相信真诚和善良会赢。你对爱情清醒又浪漫，宁缺毋滥。',
+    base:'温和有主见，幽默得体；在热闹里保持清醒，在独处时自得其乐。',
+    flaw:'嘴上说不在乎，心里其实很在意；太要强，不肯轻易示弱。',
+    line:'你值得被坚定地选择，而不是将就。' },
+  { name:'海明威', origin:'国外', era:'美国 · 二十世纪', pair:['F','H'], tags:['硬朗','简洁','旷野'],
+    spirit:'你话不多，但每一句都算数。你欣赏坚韧、真实、不矫情的东西，自己也是这么活的。',
+    base:'独立刚强，行动力强；看起来有点酷，其实对在乎的人非常温柔。',
+    flaw:'太硬撑，受伤了也说不疼；把脆弱藏得太深，久了会累。',
+    line:'你比你以为的，要坚强得多。' },
+  { name:'杜拉斯', origin:'国外', era:'法国 · 二十世纪', pair:['D','G'], tags:['炽烈','欲望','破碎美'],
+    spirit:'你的爱和恨都带着浓烈的颜色，你活得用力，爱得彻底。你敢于直面欲望和伤痛，把它们都写进生命里。',
+    base:'热烈而矛盾，表面强悍，内心千疮百孔，却依然敢爱。',
+    flaw:'情绪起伏大，爱钻牛角尖，和你好的人需要一颗强大的心脏。',
+    line:'你燃烧过，也值得被温柔接住。' },
+  { name:'川端康成', origin:'国外', era:'日本 · 二十世纪', pair:['G','C'], tags:['物哀','细腻','静美'],
+    spirit:'你有一双发现细小的美的眼睛：一片落樱、一场初雪、一个欲言又止的眼神。你比大多数人更懂得什么是哀而不伤。',
+    base:'安静内敛，情感含蓄而绵长；你不善言辞，却把一切都看在眼里。',
+    flaw:'太敏感，别人的一个表情，能让你想一整夜。',
+    line:'你看见的美，是世界悄悄写给懂它的人的情书。' },
+  { name:'卡夫卡', origin:'国外', era:'奥地利 · 二十世纪', pair:['G','E'], tags:['孤独','荒诞','内心世界'],
+    spirit:'你在人群里总有一点格格不入，像一只误入白天的猫头鹰。你对世界有种清醒的疏离，心里却藏着巨大的善意。',
+    base:'内向敏感，脑内剧场丰富；表面安静，内心波澜壮阔。',
+    flaw:'容易想太多、自我怀疑，把自己困在想象里出不来。',
+    line:'你的格格不入，恰恰是你的天赋。' },
+  { name:'托尔斯泰', origin:'国外', era:'俄国 · 十九世纪', pair:['A','E'], tags:['宏大','道德','博爱'],
+    spirit:'你关心的是大问题：人应该怎么活？怎样才算问心无愧？你心里有一杆很直的标尺，也真的愿意为相信的东西付出。',
+    base:'真诚严肃，责任感强；对世界有悲悯心，对身边人更是掏心掏肺。',
+    flaw:'太重、太认真，连放松都像在完成任务，容易把自己压得太紧。',
+    line:'你心里的善意，比你以为的更辽阔。' },
+  { name:'伍尔夫', origin:'国外', era:'英国 · 二十世纪', pair:['G','B'], tags:['意识流','内省','灵魂深处'],
+    spirit:'你的内心世界比海还深，一秒钟可以涌起无数念头。你渴望被理解，但更渴望做真实的自己，哪怕那个自己有点孤独。',
+    base:'聪慧敏感，精神世界丰富；在人群中抽离，在自己的天地里发光。',
+    flaw:'太容易内耗，反复咀嚼情绪，把能量耗在看不见的地方。',
+    line:'你的内心，是一片值得慢慢航行的海。' },
+  { name:'聂鲁达', origin:'国外', era:'智利 · 二十世纪', pair:['D','A'], tags:['热烈','海洋','情诗'],
+    spirit:'你的感情像大海一样充沛，爱要大声说，生活要用力感受。你对这个世界，有着近乎浪漫的信仰。',
+    base:'热烈直率，慷慨真诚；你愿意付出，也愿意为美好的人和事大声喝彩。',
+    flaw:'太感性，情绪来得快去得也快，做决定常凭一腔热血。',
+    line:'你爱过的每一寸人间，都因你而发光。' },
+  { name:'米兰·昆德拉', origin:'国外', era:'捷克 · 二十世纪', pair:['E','G'], tags:['思辨','轻盈','存在之问'],
+    spirit:'你习惯把生活放在脑子里反复掂量：这到底值不值、重不重、真不真。你看似随意，其实对一切都想得很深。',
+    base:'冷静幽默，带一点文人的傲气；你对平庸和矫情，都极其敏感。',
+    flaw:'想得太明白，有时反而不容易快乐。',
+    line:'你想得很深，但请别错过眼前的轻。' },
+  { name:'梭罗', origin:'国外', era:'美国 · 十九世纪', pair:['A','F'], tags:['自然','简朴','精神独立'],
+    spirit:'你向往简单、真实、自给自足的生活，讨厌被物质和噪音绑架。你在自然里充电，在独处中找回自己。',
+    base:'独立清醒，物欲很低，精神欲很高；你按自己的节奏生活，不理会别人的眼光。',
+    flaw:'有点「独」，社交电量低，有时候连亲近的人也懒得联系。',
+    line:'你向往的远方，其实一直在你心里。' },
+  { name:'狄更斯', origin:'国外', era:'英国 · 十九世纪', pair:['A','C'], tags:['仁爱','人间','救赎'],
+    spirit:'你相信善良会带来好运，相信人与人之间的温暖可以拯救彼此。你爱热闹的人间，也愿意做那个雪中送炭的人。',
+    base:'宽厚热情，共情力强；你记得别人的好，也舍得给出自己的好。',
+    flaw:'太爱操心，别人的事比自己的还上心，容易把自己累着。',
+    line:'你的温柔，是很多人世界里的一束光。' },
+  { name:'夏目漱石', origin:'国外', era:'日本 · 近现代', pair:['H','G'], tags:['幽默','孤独','清醒'],
+    spirit:'你表面随和、说话幽默，其实心里清楚得很：人终究是孤独的。你把这份清醒藏在玩笑里，笑着笑着，就看淡了。',
+    base:'外热内冷，讲究但不矫情；对人对己，都有一份诚实的审视。',
+    flaw:'有点口是心非，明明在意，偏要说「无所谓」。',
+    line:'你笑着的样子，藏住了很多心事。' },
+  { name:'里尔克', origin:'国外', era:'奥地利 · 二十世纪', pair:['D','H'], tags:['诗性','孤独','深邃'],
+    spirit:'你的感受力像最细的弦，轻轻一碰就发出很久的回响。你不追逐热闹，只追逐那些值得被郑重对待的事物。',
+    base:'内敛深沉，气质清冷；你的爱沉默、专注、长久。',
+    flaw:'太容易陷入孤独，偶尔连自己都找不到自己的快乐。',
+    line:'你的沉默里，住着最深的温柔。' },
+  { name:'塞林格', origin:'国外', era:'美国 · 二十世纪', pair:['G','A'], tags:['纯真','反叛','格格不入'],
+    spirit:'你讨厌虚伪和装模作样，心里始终留着一点不肯长大的天真。你看世界的眼光又准又温柔，像在等一个真正懂你的人。',
+    base:'率真别扭，嘴硬心软；对喜欢的东西，有孩童般的执着。',
+    flaw:'有点理想主义，对人和世界期待太高，容易失望。',
+    line:'别急着长大，你的天真很珍贵。' }
+];
+
+/* ===== 状态 ===== */
+const STORAGE_KEY = 'soul-writer-quiz-v1';
+const LETTERS = ['A','B','C','D'];
+let answers = Array(QUESTIONS.length).fill(null);
+let cur = 0;
+
+try{
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  if(saved && Array.isArray(saved.answers) && saved.answers.length === QUESTIONS.length){
+    answers = saved.answers;
+    cur = Math.min(saved.cur || 0, QUESTIONS.length - 1);
+  }
+}catch(e){}
+
+function save(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({answers, cur})); }catch(e){}
+}
+
+/* ===== 路由 ===== */
+const views = {
+  cover: document.getElementById('view-cover'),
+  quiz: document.getElementById('view-quiz'),
+  result: document.getElementById('view-result')
+};
+const topbar = document.getElementById('topbar');
+
+function showView(name){
+  Object.keys(views).forEach(k => views[k].classList.toggle('active', k === name));
+  topbar.classList.toggle('hidden', name === 'cover');
+  window.scrollTo(0, 0);
+}
+
+function route(){
+  const h = location.hash;
+  if(h === '#quiz'){ showView('quiz'); renderQuestion(); }
+  else if(h === '#result'){
+    if(answers.every(a => a !== null)){ showView('result'); renderResult(); }
+    else{ location.hash = '#cover'; }
+  }
+  else{ showView('cover'); }
+}
+
+/* ===== 答题渲染 ===== */
+const qText = document.getElementById('q-text');
+const qOpts = document.getElementById('q-opts');
+const qNo = document.getElementById('q-no');
+const qPct = document.getElementById('q-pct');
+const bar = document.getElementById('progress-bar');
+const btnPrev = document.getElementById('btn-prev');
+const btnNext = document.getElementById('btn-next');
+
+function renderQuestion(){
+  const item = QUESTIONS[cur];
+  qText.textContent = item.q;
+  qNo.textContent = `第 ${cur + 1} / 20 题`;
+  qPct.textContent = Math.round(cur / 20 * 100) + '%';
+  bar.style.width = (cur / 20 * 100) + '%';
+  btnPrev.disabled = (cur === 0);
+  btnNext.disabled = (answers[cur] === null);
+  btnNext.textContent = (cur === QUESTIONS.length - 1) ? '查看结果' : '下一题';
+
+  qOpts.innerHTML = '';
+  item.opts.forEach((opt, idx) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'opt' + (answers[cur] === idx ? ' selected' : '');
+    b.innerHTML = '<span class="letter">' + LETTERS[idx] + '</span><span>' + opt.t + '</span>';
+    b.addEventListener('click', () => {
+      answers[cur] = idx;
+      save();
+      qOpts.querySelectorAll('.opt').forEach((el, i) => el.classList.toggle('selected', i === idx));
+      btnNext.disabled = false;
+    });
+    qOpts.appendChild(b);
+  });
+}
+
+btnPrev.addEventListener('click', () => { if(cur > 0){ cur--; renderQuestion(); window.scrollTo(0, 0); } });
+btnNext.addEventListener('click', () => {
+  if(answers[cur] === null) return;
+  if(cur < QUESTIONS.length - 1){ cur++; save(); renderQuestion(); window.scrollTo(0, 0); }
+  else{ save(); location.hash = '#result'; }
+});
+
+/* ===== 结果计算与渲染 ===== */
+function computeResult(){
+  const s = {A:0,B:0,C:0,D:0,E:0,F:0,G:0,H:0};
+  QUESTIONS.forEach((item, i) => {
+    const o = item.opts[answers[i]];
+    s[o.p] += 2;
+    s[o.s] += 1;
+  });
+  const order = ['A','B','C','D','E','F','G','H'];
+  const ranked = order.slice().sort((x, y) => s[y] - s[x] || order.indexOf(x) - order.indexOf(y));
+  let writer = WRITERS[0], best = -1;
+  WRITERS.forEach(w => {
+    const sc = s[w.pair[0]] * 2 + s[w.pair[1]];
+    if(sc > best){ best = sc; writer = w; }
+  });
+  const pct = Math.max(72, Math.min(96, Math.round(best / 30 * 100)));
+  return { writer, pct, ranked, s };
+}
+
+function renderResult(){
+  const { writer, pct, ranked, s } = computeResult();
+  const card = document.getElementById('result-card');
+  const topTwo = ranked.slice(0, 2).map(k => DIMS[k]);
+
+  const dimsHtml = ranked.slice(0, 3).map(k => {
+    const w = Math.max(8, Math.round(s[k] / 30 * 100));
+    return '<div class="dim-row"><span class="dim-name">' + DIMS[k] + '</span>' +
+           '<span class="dim-track"><span class="dim-bar" style="width:' + w + '%"></span></span>' +
+           '<span class="dim-val">' + s[k] + '</span></div>';
+  }).join('');
+
+  card.innerHTML =
+    '<div class="w-name">' + writer.name + '</div>' +
+    '<div class="w-meta">' + writer.era + ' · ' + (writer.origin === '国内' ? '国内作家' : '国外作家') + '</div>' +
+    '<div class="match"><div class="match-num">' + pct + '%</div>' +
+    '<div class="match-label">灵魂契合度</div>' +
+    '<div class="match-track"><div class="match-bar" style="width:' + pct + '%"></div></div></div>' +
+    '<div class="tag-row">' +
+      '<span class="tag sage">' + topTwo[0] + '</span>' +
+      '<span class="tag blue">' + topTwo[1] + '</span>' +
+      writer.tags.map((t, i) => '<span class="tag' + (i === 0 ? ' rose' : '') + '">' + t + '</span>').join('') +
+    '</div>' +
+    '<div class="w-body">' +
+      '<div class="w-block"><h4>精神特征</h4><p>' + writer.spirit + '</p></div>' +
+      '<div class="w-block"><h4>性格底色</h4><p>' + writer.base + '</p></div>' +
+      '<div class="w-block"><h4>小缺点</h4><p>' + writer.flaw + '</p></div>' +
+    '</div>' +
+    '<div class="quote-box"><div class="q-label">TA 想对你说</div>' +
+    '<div class="q-text">「' + writer.line + '」</div></div>' +
+    '<div class="dims"><h4>你的灵魂气质构成</h4>' + dimsHtml + '</div>' +
+    '<div class="result-brand">—— 测测你的灵魂与哪位作家相似？ ——</div>';
+}
+
+/* ===== 按钮 ===== */
+document.getElementById('btn-start').addEventListener('click', () => { location.hash = '#quiz'; });
+document.getElementById('btn-retry').addEventListener('click', () => {
+  answers = Array(QUESTIONS.length).fill(null);
+  cur = 0;
+  save();
+  location.hash = '#cover';
+});
+document.getElementById('btn-home').addEventListener('click', () => { location.hash = '#cover'; });
+
+window.addEventListener('hashchange', route);
+route();
+</script>
+</body>
+</html>
